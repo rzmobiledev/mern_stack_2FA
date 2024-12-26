@@ -3,7 +3,13 @@ import {Request, Response} from "express";
 import {HTTP_STATUS} from "../../config/http.config";
 import {loginSchema, registerSchema} from "../../common/validators/auth.validator";
 import {AuthService} from "./auth.service";
-import {use} from "passport";
+import {
+    getAccessTokenCookieOptions,
+    getRefreshTokenCookieOptions,
+    setAuthenticationCookies
+} from "../../common/utils/cookie";
+import {UnauthorizedException} from "../../common/utils/catch-errors";
+
 
 export class AuthController {
     private authService: AuthService;
@@ -28,10 +34,29 @@ export class AuthController {
             ...req.body,
             userAgent: userAgent
         })
+
         const { user, accessToken, refreshToken, mfaRequired } = await this.authService.login(body)
-        return res.status(HTTP_STATUS.OK).json({
+
+        return setAuthenticationCookies(
+            res,
+            accessToken,
+            refreshToken,
+        ).status(HTTP_STATUS.OK).json({
             message: "User login successfully",
-            data: user
+            mfaRequired,
+            user
         })
+    })
+
+    public refreshToken = asyncHandler(async (req: Request, res: Response): Promise<any> => {
+        const refreshToken = await req.cookies.get("refreshToken") as string
+        if(!refreshToken) throw new UnauthorizedException("User not Authorized")
+
+        const {accessToken, newRefreshToken} = await this.authService.refreshToken(refreshToken)
+        if(newRefreshToken) res.cookie("refreshToken", newRefreshToken, getRefreshTokenCookieOptions())
+
+        return res.status(HTTP_STATUS.OK)
+            .cookie("accessToken", accessToken, getAccessTokenCookieOptions())
+            .json({message: "Refresh access token successfully"})
     })
 }

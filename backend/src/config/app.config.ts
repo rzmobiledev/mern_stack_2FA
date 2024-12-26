@@ -16,7 +16,6 @@ export type AppConfig = {
     JWT: JWTType
 }
 
-
 const appConfig: () => AppConfig = (): AppConfig => ({
     NODE_ENV: getEnv("NODE_ENV", "development"),
     APP_ORIGIN: getEnv("APP_ORIGIN", "localhost"),

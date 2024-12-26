@@ -1,13 +1,13 @@
-import jwt from 'jsonwebtoken'
 import {LoginDto, RegisterDto} from "../../common/interface/auth.interface";
 import UserModel from "../../database/models/user.model";
-import {BadRequestException} from "../../common/utils/catch-errors";
+import {BadRequestException, UnauthorizedException} from "../../common/utils/catch-errors";
 import {ErrorCode} from "../../common/enums/error_code.enum";
 import VerificationCodeModel from "../../database/models/verification.model";
 import {VerificationEnum} from "../../common/enums/verification.code.enum";
-import {fortyFiveMinutesFromNow} from "../../common/utils/date-time";
+import {calculateExpirationDate, fortyFiveMinutesFromNow, ONE_DAY_IN_MS} from "../../common/utils/date-time";
 import SessionModel from "../../database/models/session.model";
 import { config, appConfigType } from "../../config/app.config"
+import {signJWTToken, refreshTokenSignOptions, verifyJwtToken, RefreshTPayload} from "../../common/utils/jwt";
 
 export class AuthService {
     public async register(registerData: RegisterDto){
@@ -60,32 +60,52 @@ export class AuthService {
             userAgent: userAgent,
         })
 
-        const accessToken = jwt.sign(
-            {
-                userId: user._id,
-                sessionId: session._id
-            },
-            conf.JWT.SECRET,
-            {
-                audience: ["user"],
-                expiresIn: conf.JWT.EXPIRES_IN
-            }
-        )
+        const accessToken = signJWTToken({
+            userId: user._id,
+            sessionId: session._id
+        })
 
-        const refreshToken = jwt.sign(
-            { sessionId: session._id },
-            conf.JWT.REFRESH_SECRET,
-            {
-                audience: ["user"],
-                expiresIn: conf.JWT.REFRESH_EXPIRES_IN
-            }
-        )
+        const refreshToken = signJWTToken({
+            sessionId: session._id,
+        }, refreshTokenSignOptions)
 
         return {
             user,
             accessToken,
             refreshToken,
             mfaRequired: false
+        }
+    }
+
+    public async refreshToken(refreshToken: string): Promise<Record<string, string | undefined>>{
+        const { payload } = verifyJwtToken<RefreshTPayload>(refreshToken)
+
+        if(!payload) throw new UnauthorizedException("Invalid refresh token")
+
+        const session = await SessionModel.findById(payload.sessionId)
+        const now: number = Date.now()
+
+        if(!session) throw new UnauthorizedException("Session does not exist")
+
+        if(session.expiredAt.getTime() < now) throw new UnauthorizedException("Session expired")
+
+        const sessionRequiresRefresh: boolean = (session.expiredAt.getTime() - now) < ONE_DAY_IN_MS
+
+        if(sessionRequiresRefresh) {
+            session.expiredAt = calculateExpirationDate(config.JWT.REFRESH_EXPIRES_IN)
+            await session.save()
+        }
+
+        const newRefreshToken = sessionRequiresRefresh ? signJWTToken({sessionId: session._id}, refreshTokenSignOptions) : undefined
+
+        const accessToken = signJWTToken({
+            userId: session.userId,
+            sessionId: session._id
+        })
+
+        return {
+            accessToken,
+            newRefreshToken
         }
     }
 }
