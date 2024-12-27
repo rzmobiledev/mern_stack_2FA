@@ -35,6 +35,6 @@ export const errorHandler: ErrorRequestHandler = (error: any, req: Request, res:
 
     return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         message: "Internal Server Error",
-        error: error?.message || "Unknown Error"
+        errorCode: error?.message || "Unknown Error"
     })
 }

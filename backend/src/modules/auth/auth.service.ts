@@ -1,5 +1,5 @@
 import {LoginDto, RegisterDto} from "../../common/interface/auth.interface";
-import UserModel from "../../database/models/user.model";
+import UserModel, {UserDocument} from "../../database/models/user.model";
 import {BadRequestException, UnauthorizedException} from "../../common/utils/catch-errors";
 import {ErrorCode} from "../../common/enums/error_code.enum";
 import VerificationCodeModel from "../../database/models/verification.model";
@@ -8,9 +8,13 @@ import {calculateExpirationDate, fortyFiveMinutesFromNow, ONE_DAY_IN_MS} from ".
 import SessionModel from "../../database/models/session.model";
 import { config, appConfigType } from "../../config/app.config"
 import {signJWTToken, refreshTokenSignOptions, verifyJwtToken, RefreshTPayload} from "../../common/utils/jwt";
+import verificationModel from "../../database/models/verification.model";
+import {Document} from "mongoose";
+import {sendEmail} from "../../mailers/mailer";
+import {verifyEmailTemplate} from "../../mailers/templates/template";
 
 export class AuthService {
-    public async register(registerData: RegisterDto){
+    public async register(registerData: RegisterDto): Promise<{user: Document}>{
         const {name, email, password} = registerData;
 
         const existingUser = await UserModel.exists({email});
@@ -23,7 +27,7 @@ export class AuthService {
 
         const userId = newUser._id
 
-        const verificationCode = await VerificationCodeModel.create({
+        const verification = await VerificationCodeModel.create({
             userId,
             type: VerificationEnum.EMAIL_VERIFICATION,
             createdAt: new Date(),
@@ -31,6 +35,12 @@ export class AuthService {
         })
 
         // sending verification email link
+        const verificationUrl = `${config.APP_ORIGIN}/confirm-account?code=${verification.code}`;
+        await sendEmail({
+            to: newUser.email,
+            ...verifyEmailTemplate(verificationUrl)
+        })
+
         return {
             user: newUser
         }
@@ -106,6 +116,31 @@ export class AuthService {
         return {
             accessToken,
             newRefreshToken
+        }
+    }
+
+    public async verifyEmail(code: string): Promise<object> {
+        const validCode = await verificationModel.findOne({
+            code: code,
+            type: VerificationEnum.EMAIL_VERIFICATION,
+            expiresAt: { $gt: new Date()}
+        })
+
+        if(!validCode) throw new UnauthorizedException("Invalid or expired verification")
+
+        const updateUser: Document<UserDocument, any, any> | null = await UserModel.findByIdAndUpdate(validCode.userId,
+            { isEmailVerified: true }, { new: true }
+        )
+
+        if(!updateUser) throw new BadRequestException(
+            "Unable to verify email address",
+            ErrorCode.VALIDATION_ERROR
+        )
+
+        await validCode.deleteOne()
+
+        return {
+            user: updateUser
         }
     }
 }

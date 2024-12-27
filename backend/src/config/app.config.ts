@@ -13,7 +13,9 @@ export type AppConfig = {
     PORT: string,
     BASE_PATH: string,
     MONGO_URI: string,
-    JWT: JWTType
+    JWT: JWTType,
+    MAILER_SENDER: string,
+    RESEND_API_KEY: string
 }
 
 const appConfig: () => AppConfig = (): AppConfig => ({
@@ -27,7 +29,9 @@ const appConfig: () => AppConfig = (): AppConfig => ({
         EXPIRES_IN: getEnv("JWT_EXPIRES_IN", "1h"),
         REFRESH_SECRET: getEnv("JWT_REFRESH_SECRET"),
         REFRESH_EXPIRES_IN: getEnv("JWT_REFRESH_EXPIRES_IN", "1h")
-    }
+    },
+    MAILER_SENDER: getEnv("MAILER_SENDER"),
+    RESEND_API_KEY: getEnv("RESEND_API_KEY")
 })
 export const config:AppConfig = appConfig()
 export type appConfigType = ReturnType<typeof appConfig>

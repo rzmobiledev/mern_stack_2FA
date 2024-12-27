@@ -1,7 +1,7 @@
 import {asyncHandler} from "../../middleware/asyncHandler";
 import {Request, Response} from "express";
 import {HTTP_STATUS} from "../../config/http.config";
-import {loginSchema, registerSchema} from "../../common/validators/auth.validator";
+import {loginSchema, registerSchema, verificationEmailSchema} from "../../common/validators/auth.validator";
 import {AuthService} from "./auth.service";
 import {
     getAccessTokenCookieOptions,
@@ -49,8 +49,8 @@ export class AuthController {
     })
 
     public refreshToken = asyncHandler(async (req: Request, res: Response): Promise<any> => {
-        const refreshToken = await req.cookies.get("refreshToken") as string
-        if(!refreshToken) throw new UnauthorizedException("User not Authorized")
+        const refreshToken = req.cookies.refreshToken as string
+        if(!refreshToken) throw new UnauthorizedException("Missing refresh token")
 
         const {accessToken, newRefreshToken} = await this.authService.refreshToken(refreshToken)
         if(newRefreshToken) res.cookie("refreshToken", newRefreshToken, getRefreshTokenCookieOptions())
@@ -58,5 +58,14 @@ export class AuthController {
         return res.status(HTTP_STATUS.OK)
             .cookie("accessToken", accessToken, getAccessTokenCookieOptions())
             .json({message: "Refresh access token successfully"})
+    })
+
+    public verifyEmail = asyncHandler(async(req: Request, res: Response): Promise<any> => {
+        const {code} = verificationEmailSchema.parse(req.body)
+        await this.authService.verifyEmail(code)
+
+        return res.status(HTTP_STATUS.OK).json({
+            message: "Email verified successfully",
+        })
     })
 }
