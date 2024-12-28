@@ -1,4 +1,3 @@
-import {HTTP_STATUS, HttpStatusCodeType} from "../../config/http.config";
 import {ErrorCode} from "../enums/error_code.enum";
 
 export class AppError extends Error {
