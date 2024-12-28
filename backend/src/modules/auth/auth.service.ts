@@ -1,17 +1,30 @@
 import {LoginDto, RegisterDto} from "../../common/interface/auth.interface";
 import UserModel, {UserDocument} from "../../database/models/user.model";
-import {BadRequestException, UnauthorizedException} from "../../common/utils/catch-errors";
+import {
+    BadRequestException,
+    HttpException, InternalServerError, InternalServerException,
+    NotFoundException,
+    UnauthorizedException
+} from "../../common/utils/catch-errors";
 import {ErrorCode} from "../../common/enums/error_code.enum";
 import VerificationCodeModel from "../../database/models/verification.model";
-import {VerificationEnum} from "../../common/enums/verification.code.enum";
-import {calculateExpirationDate, fortyFiveMinutesFromNow, ONE_DAY_IN_MS} from "../../common/utils/date-time";
-import SessionModel from "../../database/models/session.model";
-import { config, appConfigType } from "../../config/app.config"
-import {signJWTToken, refreshTokenSignOptions, verifyJwtToken, RefreshTPayload} from "../../common/utils/jwt";
 import verificationModel from "../../database/models/verification.model";
+import VerificationModel from "../../database/models/verification.model";
+import {VerificationEnum} from "../../common/enums/verification.code.enum";
+import {
+    calculateExpirationDate,
+    fortyFiveMinutesFromNow,
+    ONE_DAY_IN_MS,
+    threeMinutesAgo,
+    anHourFromNow
+} from "../../common/utils/date-time";
+import SessionModel from "../../database/models/session.model";
+import {appConfigType, config} from "../../config/app.config"
+import {refreshTokenSignOptions, RefreshTPayload, signJWTToken, verifyJwtToken} from "../../common/utils/jwt";
 import {Document} from "mongoose";
 import {sendEmail} from "../../mailers/mailer";
-import {verifyEmailTemplate} from "../../mailers/templates/template";
+import {passwordResetTemplate, verifyEmailTemplate} from "../../mailers/templates/template";
+import {HTTP_STATUS} from "../../config/http.config";
 
 export class AuthService {
     public async register(registerData: RegisterDto): Promise<{user: Document}>{
@@ -20,7 +33,9 @@ export class AuthService {
         const existingUser = await UserModel.exists({email});
 
         if(existingUser){
-            throw new BadRequestException("User already exists with this email", ErrorCode.AUTH_EMAIL_ALREADY_EXISTS);
+            throw new BadRequestException(
+                "User already exists with this email",
+                ErrorCode.AUTH_EMAIL_ALREADY_EXISTS);
         }
 
         const newUser = await UserModel.create({name, email, password});
@@ -141,6 +156,48 @@ export class AuthService {
 
         return {
             user: updateUser
+        }
+    }
+
+    public async forgotPassword(email: string): Promise<{url: string, emailId: string}> {
+        const user = await UserModel.findOne({email})
+        if(!user) throw new NotFoundException("User not found")
+
+        // check mail rate limit is 2 emails per 3 or 10 min
+        const timeAgo: Date = threeMinutesAgo()
+        const maxAttempts = 2
+
+        const count = await VerificationModel.countDocuments({
+            userId: user._id,
+            type: VerificationEnum.PASSWORD_RESET,
+            createdAt: {$gt : timeAgo},
+        })
+
+        if(count > maxAttempts) throw new HttpException(
+            "Too many requests, try again later"
+        )
+
+        const expiresAt: Date = anHourFromNow()
+        const validCode = await VerificationModel.create({
+            userId: user._id,
+            type: VerificationEnum.PASSWORD_RESET,
+            expiresAt
+        })
+
+        const resetLink = `${config.APP_ORIGIN}/reset-password?code=${validCode.code}&exp=${expiresAt.getTime()}`
+
+        const { data, error } = await sendEmail({
+            to: user.email,
+            ...passwordResetTemplate(resetLink)
+        })
+
+        if(!data?.id) throw new InternalServerException(
+            `${error?.name} ${error?.message}`
+        )
+
+        return {
+            url: resetLink,
+            emailId: data.id
         }
     }
 }

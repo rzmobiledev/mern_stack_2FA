@@ -13,6 +13,6 @@ export type EmailFormatter = {
 const mailer_sender = config.NODE_ENV === "production" ?
     `no-reply <onboarding@resend.dev>` : `no-reply <${config.MAILER_SENDER}>`
 
-export const sendEmail = async <T extends EmailFormatter>(val: T): Promise<EmailFormatter | CreateEmailResponse> => {
+export const sendEmail = async <T extends EmailFormatter>(val: T): Promise<CreateEmailResponse> => {
     return await resend.emails.send({...val, from: mailer_sender})
 }

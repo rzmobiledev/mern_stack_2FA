@@ -1,4 +1,4 @@
-import {HTTP_STATUS} from "../../config/http.config";
+import {HTTP_STATUS, HttpStatusCodeType} from "../../config/http.config";
 import {ErrorCode} from "../enums/error_code.enum";
 
 export class AppError extends Error {
@@ -7,12 +7,12 @@ export class AppError extends Error {
 
     constructor(
         message: string,
-        statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-        errorCode: ErrorCode | undefined
+        errorCode: ErrorCode | undefined,
+        statusCode: number
     ) {
         super(message);
-        this.statusCode = statusCode;
         this.errorCode = errorCode;
+        this.statusCode = statusCode;
         Error.captureStackTrace(this, this.constructor);
     }
 

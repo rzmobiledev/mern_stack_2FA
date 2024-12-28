@@ -1,7 +1,13 @@
 import {asyncHandler} from "../../middleware/asyncHandler";
 import {Request, Response} from "express";
 import {HTTP_STATUS} from "../../config/http.config";
-import {loginSchema, registerSchema, verificationEmailSchema} from "../../common/validators/auth.validator";
+import {
+    emailSchema,
+    loginSchema,
+    registerSchema,
+    resetPasswordSchema,
+    verificationEmailSchema
+} from "../../common/validators/auth.validator";
 import {AuthService} from "./auth.service";
 import {
     getAccessTokenCookieOptions,
@@ -66,6 +72,15 @@ export class AuthController {
 
         return res.status(HTTP_STATUS.OK).json({
             message: "Email verified successfully",
+        })
+    })
+
+    public forgotPassword = asyncHandler(async(req: Request, res: Response): Promise<any> => {
+        const email: string = emailSchema.parse(req.body.email)
+        await this.authService.forgotPassword(email)
+
+        return res.status(HTTP_STATUS.OK).json({
+            message: "Password reset email sent"
         })
     })
 }

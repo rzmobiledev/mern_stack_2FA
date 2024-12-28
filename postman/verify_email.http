@@ -1,0 +1,7 @@
+###
+POST http://localhost:5000/api/v1/auth/verify/email
+Content-Type: application/json
+
+{
+  "code": "9744652fa8524c188d4e65912"
+}
