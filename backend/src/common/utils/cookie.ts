@@ -38,8 +38,8 @@ export const setAuthenticationCookies = (
     .cookie("accessToken", accessToken, getAccessTokenCookieOptions())
     .cookie("refreshToken", refreshToken, getRefreshTokenCookieOptions())
 
-export const clearAuthenticationCookies = (res: Response)=> {
-    res.clearCookie("accessToken").clearCookie("refreshToken", {
+export const clearAuthenticationCookies = (res: Response): Response => {
+    return res.clearCookie("accessToken").clearCookie("refreshToken", {
         path: REFRESH_PATH
     })
 }

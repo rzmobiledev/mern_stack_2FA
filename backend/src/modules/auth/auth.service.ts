@@ -1,4 +1,4 @@
-import {LoginDto, RegisterDto} from "../../common/interface/auth.interface";
+import {LoginDto, RegisterDto, ResetPasswordDto} from "../../common/interface/auth.interface";
 import UserModel, {UserDocument} from "../../database/models/user.model";
 import {
     BadRequestException,
@@ -25,6 +25,8 @@ import {Document} from "mongoose";
 import {sendEmail} from "../../mailers/mailer";
 import {passwordResetTemplate, verifyEmailTemplate} from "../../mailers/templates/template";
 import {HTTP_STATUS} from "../../config/http.config";
+import {hashValue} from "../../common/utils/bcrypt";
+import sessionModel from "../../database/models/session.model";
 
 export class AuthService {
     public async register(registerData: RegisterDto): Promise<{user: Document}>{
@@ -173,7 +175,9 @@ export class AuthService {
             createdAt: {$gt : timeAgo},
         })
 
-        if(count > maxAttempts) throw new HttpException(
+        console.log(count)
+
+        if(count >= maxAttempts) throw new HttpException(
             "Too many requests, try again later"
         )
 
@@ -181,10 +185,11 @@ export class AuthService {
         const validCode = await VerificationModel.create({
             userId: user._id,
             type: VerificationEnum.PASSWORD_RESET,
+            createdAt: new Date(),
             expiresAt
         })
 
-        const resetLink = `${config.APP_ORIGIN}/reset-password?code=${validCode.code}&exp=${expiresAt.getTime()}`
+        const resetLink = `${config.APP_ORIGIN}${config.BASE_PATH}/reset-password?code=${validCode.code}&exp=${expiresAt.getTime()}`
 
         const { data, error } = await sendEmail({
             to: user.email,
@@ -198,6 +203,35 @@ export class AuthService {
         return {
             url: resetLink,
             emailId: data.id
+        }
+    }
+
+    public async resetPassword({password, verificationCode}: ResetPasswordDto): Promise<any> {
+        const validCode = await verificationModel.findOne({
+            code: verificationCode,
+            type: VerificationEnum.PASSWORD_RESET,
+            expiresAt: { $gt: new Date()}
+        })
+
+        if(!validCode) throw new NotFoundException("Invalid or expired verification verification code")
+
+        const hashedPassword = await hashValue(password)
+
+        const updateUser = await UserModel.findByIdAndUpdate(
+            validCode.userId, {
+                password: hashedPassword
+            }
+        )
+
+        if(!updateUser) throw new BadRequestException("Failed to reset password")
+        await validCode.deleteOne()
+
+        await sessionModel.deleteMany({
+            userId: updateUser._id
+        })
+
+        return {
+            user: updateUser,
         }
     }
 }

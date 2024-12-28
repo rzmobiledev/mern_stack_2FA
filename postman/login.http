@@ -1,0 +1,8 @@
+### Register
+POST http://localhost:5000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "rzmobiledev@gmail.com",
+  "password": "safril"
+}
