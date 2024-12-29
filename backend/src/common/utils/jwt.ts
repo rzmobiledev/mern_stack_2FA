@@ -2,6 +2,7 @@ import {UserDocument} from "../../database/models/user.model";
 import {SessionDocument} from "../../database/models/session.model";
 import jwt, { SignOptions, VerifyOptions} from "jsonwebtoken";
 import { config} from "../../config/app.config"
+import {Request} from "express";
 
 export type AccessTPayload = {
     userId: UserDocument["_id"]

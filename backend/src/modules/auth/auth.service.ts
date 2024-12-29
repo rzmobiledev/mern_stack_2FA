@@ -96,8 +96,10 @@ export class AuthService {
             sessionId: session._id,
         }, refreshTokenSignOptions)
 
+
         return {
             user,
+            sessionId: session._id,
             accessToken,
             refreshToken,
             mfaRequired: false
@@ -175,8 +177,6 @@ export class AuthService {
             createdAt: {$gt : timeAgo},
         })
 
-        console.log(count)
-
         if(count >= maxAttempts) throw new HttpException(
             "Too many requests, try again later"
         )
@@ -233,5 +233,9 @@ export class AuthService {
         return {
             user: updateUser,
         }
+    }
+
+    public async logout(sessionId: string): Promise<any> {
+        return SessionModel.findByIdAndDelete(sessionId)
     }
 }

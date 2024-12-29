@@ -41,7 +41,7 @@ export class AuthController {
             userAgent: userAgent
         })
 
-        const { user, accessToken, refreshToken, mfaRequired } = await this.authService.login(body)
+        const { user, accessToken, sessionId, refreshToken, mfaRequired } = await this.authService.login(body)
 
         return setAuthenticationCookies(
             res,
@@ -90,6 +90,16 @@ export class AuthController {
 
         return clearAuthenticationCookies(res).status(HTTP_STATUS.OK).json({
             message: "Password reset successfully",
+        })
+    })
+
+    public logout = asyncHandler(async (req: Request, res: Response): Promise<any> => {
+        const sessionId = req.sessionId
+        if(!sessionId) throw new UnauthorizedException("Session is invalid")
+
+        await this.authService.logout(sessionId)
+        return clearAuthenticationCookies(res).status(HTTP_STATUS.OK).json({
+            message: "User logout successfully",
         })
     })
 }

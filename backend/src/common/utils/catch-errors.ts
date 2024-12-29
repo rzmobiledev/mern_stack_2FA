@@ -16,7 +16,7 @@ export class NotFoundException extends AppError {
 export class UnauthorizedException extends AppError {
     constructor(
         message = "Unauthorized Access",
-        errorCode?: ErrorCode.ACCESS_UNAUTHORIZED,
+        errorCode?: ErrorCode,
         statusCode?: number,
     ) {
         super(message, errorCode || ErrorCode.ACCESS_UNAUTHORIZED, statusCode || HTTP_STATUS.UNAUTHORIZED, );
