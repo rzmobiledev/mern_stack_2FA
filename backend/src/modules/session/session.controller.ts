@@ -12,7 +12,7 @@ export class SessionController {
 
     public getAllSession = asyncHandler(async (req: Request, res: Response): Promise<any> => {
         const userId = req.user?.id;
-        const sessionId = req.sessionId;
+        const sessionId: string = req.sessionId!;
 
         const { sessions } = await this.sessionService.getAllSession(userId);
 

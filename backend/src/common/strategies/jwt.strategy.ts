@@ -22,7 +22,7 @@ interface JwtPayload {
 
 const options: StrategyOptionsWithoutRequest = {
     jwtFromRequest: ExtractJwt.fromExtractors([
-        (req: Request) => {
+        <T extends Request>(req: T) => {
             const accessToken = req.cookies.accessToken
             if(!accessToken) throw new UnauthorizedException(
                 "Unauthorized access token",
@@ -35,13 +35,6 @@ const options: StrategyOptionsWithoutRequest = {
     audience: ["user"],
     algorithms: ["HS256"],
     passReqToCallback: <any>true,
-}
-
-
-class NewStrategy extends Strategy {
-    constructor(opt: StrategyOptionsWithoutRequest, verify: VerifiedCallback, req: Request) {
-        super(opt, verify);
-    }
 }
 
 export const setupJwtStrategy = (passport: PassportStatic) => {
