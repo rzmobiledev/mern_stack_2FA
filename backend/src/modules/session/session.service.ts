@@ -1,4 +1,5 @@
 import SessionModel from "../../database/models/session.model";
+import {NotFoundException} from "../../common/utils/catch-errors";
 
 export class SessionService {
 
@@ -17,5 +18,23 @@ export class SessionService {
         });
 
         return { sessions };
+    }
+
+    public async getSessionById(sessionId: string) {
+        const session = await SessionModel.findById(sessionId)
+            .populate("userId")
+            .select("-expiredAt")
+
+        if(!session) throw new NotFoundException("Session not found");
+        return session
+    }
+
+    public async deleteSession(sessionId: string, userId: string): Promise<boolean> {
+        const deletedSession = await SessionModel.findByIdAndDelete({
+            _id: sessionId,
+            userId: userId
+        })
+        if(!deletedSession) throw new NotFoundException("Session not found");
+        return true
     }
 }
