@@ -66,7 +66,7 @@ export class AuthService {
     public async login(loginData: LoginDto){
         const conf: appConfigType = config
         const {email, password, userAgent} = loginData
-        const user = await UserModel.findOne({email})
+        const user: UserDocument | null = await UserModel.findOne({email})
         if(!user){
             throw new BadRequestException(
                 "Invalid email or password provided",
@@ -80,6 +80,13 @@ export class AuthService {
                 "Invalid email or password provided",
                 ErrorCode.AUTH_USER_NOT_FOUND
             )
+        }
+
+        if(user.userPreferences?.enable2FA) return {
+            user: null,
+            accessToken: "",
+            refreshToken:"",
+            mfaRequired: true
         }
 
         const session = await SessionModel.create({
