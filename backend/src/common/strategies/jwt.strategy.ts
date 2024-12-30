@@ -12,6 +12,7 @@ import {config} from "../../config/app.config";
 import {userService} from "../../modules/user/user.module";
 import passport from "passport";
 import {AppError} from "../utils/AppError";
+import {UserDocument} from "../../database/models/user.model";
 
 
 interface JwtPayload {
@@ -33,7 +34,7 @@ const options: StrategyOptionsWithoutRequest = {
     secretOrKey: config.JWT.SECRET,
     audience: ["user"],
     algorithms: ["HS256"],
-    passReqToCallback: false,
+    passReqToCallback: <any>true,
 }
 
 
@@ -45,12 +46,14 @@ class NewStrategy extends Strategy {
 
 export const setupJwtStrategy = (passport: PassportStatic) => {
 
-    passport.use(new Strategy(options, async(payload: JwtPayload, done: VerifiedCallback): Promise<void> => {
+    // @ts-ignore
+    passport.use(new Strategy(options, async<T extends Request>(req: T, payload: JwtPayload, done: VerifiedCallback): Promise<void> => {
         try{
             const user = await userService.findUserById(payload.userId)
             if(!user) {
                 return done(null,  false)
             }
+            req.sessionId = payload.sessionId
             return done(null, user, payload)
         }catch(err){
             return done(err, false)
@@ -58,4 +61,6 @@ export const setupJwtStrategy = (passport: PassportStatic) => {
     }))
 }
 
-export const authenticateJWT = passport.authenticate('jwt', {session: false})
+export const authenticateJWT = passport.authenticate(
+    'jwt', {session: false}
+)

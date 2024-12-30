@@ -15,6 +15,7 @@ import {
     setAuthenticationCookies
 } from "../../common/utils/cookie";
 import {UnauthorizedException} from "../../common/utils/catch-errors";
+import {session} from "passport";
 
 
 export class AuthController {
@@ -41,7 +42,7 @@ export class AuthController {
             userAgent: userAgent
         })
 
-        const { user, accessToken, sessionId, refreshToken, mfaRequired } = await this.authService.login(body)
+        const { user, accessToken, refreshToken, mfaRequired } = await this.authService.login(body)
 
         return setAuthenticationCookies(
             res,

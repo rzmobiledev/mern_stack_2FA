@@ -99,7 +99,6 @@ export class AuthService {
 
         return {
             user,
-            sessionId: session._id,
             accessToken,
             refreshToken,
             mfaRequired: false
