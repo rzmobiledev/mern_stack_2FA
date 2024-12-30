@@ -8,6 +8,8 @@ import {errorHandler} from "./middleware/errorHandler";
 import {HTTP_STATUS} from "./config/http.config";
 import {asyncHandler} from "./middleware/asyncHandler";
 import authRoutes from "./modules/auth/auth.routes";
+import sessionRoutes from "./modules/session/session.routes";
+import passport from "./middleware/passport";
 
 const app: Express = express()
 const BASE_PATH: string = config.BASE_PATH
@@ -15,11 +17,12 @@ const BASE_PATH: string = config.BASE_PATH
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({
-    origin: config.APP_ORIGIN.split(','),
+    origin: config.CORS_ORIGIN,
     credentials: true
 }))
 
 app.use(cookieParser())
+app.use(passport.initialize())
 
 app.get('/', asyncHandler(async(req: Request, res: Response): Promise<void> => {
     res.status(HTTP_STATUS.OK).json({
@@ -28,6 +31,7 @@ app.get('/', asyncHandler(async(req: Request, res: Response): Promise<void> => {
 }))
 
 app.use(`${BASE_PATH}/auth`, authRoutes)
+app.use(`${BASE_PATH}/session`, sessionRoutes)
 
 app.use(errorHandler)
 
