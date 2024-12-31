@@ -28,7 +28,7 @@ export class MfaService {
         }
         const url = speakeasy.otpauthURL({
             secret: secretKey,
-            label: `{user.name}`,
+            label: `${user.name}`,
             issuer: "squeezy.com",
             encoding: "base32"
         })

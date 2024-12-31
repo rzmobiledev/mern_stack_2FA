@@ -22,7 +22,7 @@ interface JwtPayload {
 
 const options: StrategyOptionsWithoutRequest = {
     jwtFromRequest: ExtractJwt.fromExtractors([
-        <T extends Request>(req: T) => {
+        <T extends Request>(req: T): string => {
             const accessToken = req.cookies.accessToken
             if(!accessToken) throw new UnauthorizedException(
                 "Unauthorized access token",

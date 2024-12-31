@@ -64,7 +64,6 @@ export class AuthService {
     }
 
     public async login(loginData: LoginDto){
-        const conf: appConfigType = config
         const {email, password, userAgent} = loginData
         const user: UserDocument | null = await UserModel.findOne({email})
         if(!user){

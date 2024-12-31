@@ -9,8 +9,8 @@ export type JWTType = {
 
 export type AppConfig = {
     NODE_ENV: string,
-    APP_ORIGIN: string | [],
-    CORS_ORIGIN: string | [],
+    APP_ORIGIN: string | string[],
+    CORS_ORIGIN: string | string[],
     PORT: string,
     BASE_PATH: string,
     MONGO_URI: string,
@@ -26,7 +26,7 @@ const APP_ORIGIN = Array.isArray(origin) ? origin.split(',')[0] : origin
 const appConfig: () => AppConfig = (): AppConfig => ({
     NODE_ENV: NODE_ENV,
     APP_ORIGIN: APP_ORIGIN,
-    CORS_ORIGIN: origin,
+    CORS_ORIGIN: Array.isArray(origin) ? origin.split(',') : origin,
     PORT: getEnv("PORT", "5000"),
     BASE_PATH: getEnv("BASE_PATH", "/api/v1"),
     MONGO_URI: getEnv("MONGO_DB_URI"),
