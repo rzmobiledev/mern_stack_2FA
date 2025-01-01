@@ -19,3 +19,5 @@ export const loginMutationFn: (data: LoginType) => Promise<AxiosXHR<unknown>> = 
 export const registerMutationFn: (data: RegisterType) => Promise<AxiosXHR<unknown>> = async (data: RegisterType):Promise<AxiosXHR<unknown>> =>
     await API.post("/auth/register", data)
 
+export const forgotPasswordMutationFn: (data: Omit<LoginType, "password">) => Promise<AxiosXHR<unknown>> = async (data: Omit<LoginType, "password">):Promise<AxiosXHR<unknown>> =>
+    await API.post("/auth/password/forgot", data)

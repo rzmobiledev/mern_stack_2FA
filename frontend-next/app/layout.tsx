@@ -23,13 +23,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${dm_sans.variable} antialiased`}
+        className={`bg-background ${dm_sans.className} antialiased`}
       >
       <QueryProvider>
           <ThemeProvider
               attribute="class"
               defaultTheme="dark"
-              enableSystem={false}
+              enableSystem
               disableTransitionOnChange
           >
               {children}
