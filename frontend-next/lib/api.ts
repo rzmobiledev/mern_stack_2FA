@@ -1,4 +1,5 @@
 import API from "@/lib/axios-client"
+import AxiosXHR = Axios.AxiosXHR;
 
 type LoginType = {
     email: string
@@ -12,8 +13,9 @@ type RegisterType = {
     confirmPassword: string
 }
 
-export const loginMutationFn = async (data: LoginType) =>
+export const loginMutationFn: (data: LoginType) => Promise<AxiosXHR<unknown>> = async (data: LoginType):Promise<AxiosXHR<unknown>> =>
     await API.post("/auth/login", data)
 
-export const registerMutationFn = async (data: RegisterType) =>
-    await API.post("/auth/login", data)
+export const registerMutationFn: (data: RegisterType) => Promise<AxiosXHR<unknown>> = async (data: RegisterType):Promise<AxiosXHR<unknown>> =>
+    await API.post("/auth/register", data)
+

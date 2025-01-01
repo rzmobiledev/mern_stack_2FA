@@ -21,12 +21,12 @@ export type AppConfig = {
 
 const origin = getEnv("APP_ORIGIN", "localhost")
 const NODE_ENV = getEnv("NODE_ENV", "development")
-const APP_ORIGIN = Array.isArray(origin) ? origin.split(',')[0] : origin
+const APP_ORIGIN = origin.split(',')
 
 const appConfig: () => AppConfig = (): AppConfig => ({
     NODE_ENV: NODE_ENV,
-    APP_ORIGIN: APP_ORIGIN,
-    CORS_ORIGIN: Array.isArray(origin) ? origin.split(',') : origin,
+    APP_ORIGIN: APP_ORIGIN[0],
+    CORS_ORIGIN: APP_ORIGIN,
     PORT: getEnv("PORT", "5000"),
     BASE_PATH: getEnv("BASE_PATH", "/api/v1"),
     MONGO_URI: getEnv("MONGO_DB_URI"),

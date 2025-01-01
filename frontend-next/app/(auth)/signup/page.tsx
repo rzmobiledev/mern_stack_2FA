@@ -14,16 +14,27 @@ import {
 } from "@/components/ui/form"
 import {Input} from "@/components/ui/input"
 import {Button} from "@/components/ui/button"
-import {ArrowRight, MailCheckIcon} from "lucide-react"
+import {ArrowRight, Loader, MailCheckIcon} from "lucide-react"
 import Logo from "@/components/logo"
+import {useMutation} from "@tanstack/react-query"
+import {registerMutationFn} from "@/lib/api"
+import {toast} from "@/hooks/use-toast";
 
 export default function SignUp(){
     const [isSubmitted, setIsSubmitted] = useState(false)
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: registerMutationFn,
+    });
 
     const formSchema = z.object({
         name: z.string().trim().min(1, "Name is required"),
         email: z.string().email().trim().min(3, "Email is required"),
         password: z.string().trim().min(3, "Password is required"),
+        confirmPassword: z.string().trim().min(3, "Password is required"),
+    }).refine((val) => val.password === val.confirmPassword, {
+        message: "Password does not match",
+        path: ['confirmPassword'],
     })
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -32,10 +43,24 @@ export default function SignUp(){
             name: "",
             email: "",
             password: "",
+            confirmPassword: "",
         }
     })
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {}
+    const onSubmit = (values: z.infer<typeof formSchema>) => {
+        mutate(values, {
+            onSuccess: values => {
+                setIsSubmitted(true)
+            },
+            onError: error => {
+                toast({
+                    title: "Error",
+                    description: error.message,
+                    variant: "destructive"
+                })
+            }
+        })
+    }
 
     return (
         <>
@@ -66,7 +91,7 @@ export default function SignUp(){
                                                     Name
                                                 </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Techwithemma" {...field} />
+                                                    <Input placeholder="Techwithrizal" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -138,7 +163,8 @@ export default function SignUp(){
                                     />
                                 </div>
                                 <Button
-                                    className="w-full text-[15px] h-[40px] !bg-blue-500 text-white font-semibold"
+                                    className="w-full text-[15px] h-[40px] !bg-blue-500 text-white font-semibold
+                                    flex items-center justify-center"
                                     disabled={isPending}
                                     type="submit"
                                 >
@@ -193,7 +219,7 @@ export default function SignUp(){
                             We just sent a verification link to {form.getValues().email}.
                         </p>
                         <Link href="/">
-                            <Button className="h-[40px]">
+                            <Button className="h-[40px] flex justify-center items-center">
                                 Go to login
                                 <ArrowRight />
                             </Button>
