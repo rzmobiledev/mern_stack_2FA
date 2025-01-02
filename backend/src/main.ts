@@ -10,6 +10,7 @@ import {asyncHandler} from "./middleware/asyncHandler";
 import authRoutes from "./modules/auth/auth.routes";
 import sessionRoutes from "./modules/session/session.routes";
 import passport from "./middleware/passport";
+import mfaRoutes from "./modules/mfa/mfa.routes";
 
 const app: Express = express()
 const BASE_PATH: string = config.BASE_PATH
@@ -32,6 +33,7 @@ app.get('/', asyncHandler(async(req: Request, res: Response): Promise<void> => {
 
 app.use(`${BASE_PATH}/auth`, authRoutes)
 app.use(`${BASE_PATH}/session`, sessionRoutes)
+app.use(`${BASE_PATH}/mfa`, mfaRoutes)
 
 app.use(errorHandler)
 
