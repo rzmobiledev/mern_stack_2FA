@@ -91,7 +91,7 @@ export default function Login() {
                             Email
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="subscribeto@channel.com" {...field} />
+                            <Input placeholder="rzmobiledev@gmail.com" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

@@ -20,3 +20,8 @@ export type UserData = {
     mfaRequired: boolean
     data: UserDocument
 }
+
+export type MfaResponseType = {
+    message: string
+    user: UserDocument
+}

@@ -1,41 +1,35 @@
-"use client"
-import {useState} from "react"
-import {zodResolver} from "@hookform/resolvers/zod"
-import {useForm} from "react-hook-form"
-import {z} from "zod"
-import Link from "next/link"
+"use client";
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import Link from "next/link";
 import {
     Form,
     FormControl,
     FormField,
     FormItem,
     FormLabel,
-    FormMessage
-} from "@/components/ui/form"
-import {Input} from "@/components/ui/input"
-import {Button} from "@/components/ui/button"
-import {ArrowRight, Loader, MailCheckIcon} from "lucide-react"
-import Logo from "@/components/logo"
-import {useMutation} from "@tanstack/react-query"
-import {registerMutationFn} from "@/lib/api"
-import {toast} from "@/hooks/use-toast";
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, MailCheckIcon } from "lucide-react";
+import Logo from "@/components/logo";
 
-export default function SignUp(){
-    const [isSubmitted, setIsSubmitted] = useState(false)
-
-    const { mutate, isPending } = useMutation({
-        mutationFn: registerMutationFn,
-    });
-
+export default function SignUp() {
+    const [isSubmited] = useState(false);
     const formSchema = z.object({
-        name: z.string().trim().min(1, "Name is required"),
-        email: z.string().email().trim().min(3, "Email is required"),
-        password: z.string().trim().min(3, "Password is required"),
-        confirmPassword: z.string().trim().min(3, "Password is required"),
-    }).refine((val) => val.password === val.confirmPassword, {
-        message: "Password does not match",
-        path: ['confirmPassword'],
-    })
+        name: z.string().trim().min(1, {
+            message: "Name is required",
+        }),
+        email: z.string().trim().email().min(1, {
+            message: "Email is required",
+        }),
+        password: z.string().trim().min(1, {
+            message: "Password is required",
+        }),
+    });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -43,29 +37,15 @@ export default function SignUp(){
             name: "",
             email: "",
             password: "",
-            confirmPassword: "",
-        }
-    })
+        },
+    });
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        mutate(values, {
-            onSuccess: values => {
-                setIsSubmitted(true)
-            },
-            onError: error => {
-                toast({
-                    title: "Error",
-                    description: error.message,
-                    variant: "destructive"
-                })
-            }
-        })
-    }
+    const onSubmit = (values: z.infer<typeof formSchema>) => {};
 
     return (
         <>
             <main className="w-full min-h-[590px] h-auto max-w-full pt-10">
-                {!isSubmitted ? (
+                {!isSubmited ? (
                     <div className="w-full p-5 rounded-md">
                         <Logo />
 
@@ -91,7 +71,7 @@ export default function SignUp(){
                                                     Name
                                                 </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Techwithrizal" {...field} />
+                                                    <Input placeholder="Techwithemma" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -109,8 +89,7 @@ export default function SignUp(){
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        placeholder="rzmobiledev@gmail.com"
-                                                        autoComplete="off"
+                                                        placeholder="subscribeto@channel.com"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -129,33 +108,7 @@ export default function SignUp(){
                                                     Password
                                                 </FormLabel>
                                                 <FormControl>
-                                                    <Input
-                                                        type="password"
-                                                        placeholder="••••••••••••"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-
-                                <div className="mb-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="confirmPassword"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="dark:text-[#f1f7feb5] text-sm">
-                                                    Confirm Password
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        type="password"
-                                                        placeholder="••••••••••••"
-                                                        {...field}
-                                                    />
+                                                    <Input placeholder="••••••••••••" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -163,12 +116,9 @@ export default function SignUp(){
                                     />
                                 </div>
                                 <Button
-                                    className="w-full text-[15px] h-[40px] !bg-blue-500 text-white font-semibold
-                                    flex items-center justify-center"
-                                    disabled={isPending}
+                                    className="w-full text-[15px] h-[40px] !bg-blue-500 text-white font-semibold"
                                     type="submit"
                                 >
-                                    {isPending && <Loader className="animate-spin" />}
                                     Create account
                                     <ArrowRight />
                                 </Button>
@@ -216,10 +166,10 @@ export default function SignUp(){
                             Check your email
                         </h2>
                         <p className="mb-2 text-center text-sm text-muted-foreground dark:text-[#f1f7feb5] font-normal">
-                            We just sent a verification link to {form.getValues().email}.
+                            We just sent a verification link to natesiv517@edectus.com.
                         </p>
                         <Link href="/">
-                            <Button className="h-[40px] flex justify-center items-center">
+                            <Button className="h-[40px]">
                                 Go to login
                                 <ArrowRight />
                             </Button>
@@ -228,5 +178,5 @@ export default function SignUp(){
                 )}
             </main>
         </>
-    )
+    );
 }

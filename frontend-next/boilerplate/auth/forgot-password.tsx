@@ -3,9 +3,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, MailCheckIcon, Loader } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-
+import { ArrowRight, Link, MailCheckIcon } from "lucide-react";
 import {
     Form,
     FormControl,
@@ -17,21 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
-import { forgotPasswordMutationFn } from "@/lib/api";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
-import Link from "next/link";
 
 export default function ForgotPassword() {
-    const params = useSearchParams();
-
-    const email = params.get("email");
-
-    const [isSubmitted, setIsSubmitted] = useState(false);
-
-    const { mutate, isPending } = useMutation({
-        mutationFn: forgotPasswordMutationFn,
-    });
+    const [isSubmitted] = useState(false);
 
     const formSchema = z.object({
         email: z.string().trim().email().min(1, {
@@ -42,25 +28,11 @@ export default function ForgotPassword() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: email || "",
+            email: "",
         },
     });
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        mutate(values, {
-            onSuccess: (response: any) => {
-                setIsSubmitted(true);
-            },
-            onError: (error) => {
-                console.log(error);
-                toast({
-                    title: "Error",
-                    description: error.message,
-                    variant: "destructive",
-                });
-            },
-        });
-    };
+    const onSubmit = (values: z.infer<typeof formSchema>) => {};
 
     return (
         <main className="w-full min-h-[590px] h-full max-w-full flex items-center justify-center ">
@@ -95,7 +67,6 @@ export default function ForgotPassword() {
                                             <FormControl>
                                                 <Input
                                                     placeholder="rzmobiledev@gmail.com"
-                                                    autoComplete="off"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -104,11 +75,7 @@ export default function ForgotPassword() {
                                     )}
                                 />
                             </div>
-                            <Button
-                                disabled={isPending}
-                                className="w-full text-[15px] h-[40px] text-white font-semibold"
-                            >
-                                {isPending && <Loader className="animate-spin" />}
+                            <Button className="w-full text-[15px] h-[40px] text-white font-semibold">
                                 Send reset instructions
                             </Button>
                         </form>
@@ -126,7 +93,7 @@ export default function ForgotPassword() {
                         We just sent a password reset link to {form.getValues().email}.
                     </p>
                     <Link href="/">
-                        <Button className="h-[40px] flex justify-center items-center">
+                        <Button className="h-[40px]">
                             Go to login
                             <ArrowRight />
                         </Button>
@@ -134,5 +101,5 @@ export default function ForgotPassword() {
                 </div>
             )}
         </main>
-    )
+    );
 }

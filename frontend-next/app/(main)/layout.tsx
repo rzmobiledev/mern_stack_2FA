@@ -1,7 +1,23 @@
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import Asidebar from "./_components/Asidebar";
+import Header from "./_components/Header";
+import { AuthProvider } from "@/context/auth-provider";
 import React from "react";
 
-export default function MainLayout({children}: { children: React.ReactNode}){
+export default function MainLayout({children}: Readonly<{
+    children: React.ReactNode;
+}>) {
     return (
-        <div>{children}</div>
-    )
+        <AuthProvider>
+            <SidebarProvider>
+                <Asidebar />
+                <SidebarInset>
+                    <main className="w-full">
+                        <Header />
+                        {children}
+                    </main>
+                </SidebarInset>
+            </SidebarProvider>
+        </AuthProvider>
+    );
 }
