@@ -194,7 +194,8 @@ export class AuthService {
             expiresAt
         })
 
-        const resetLink = `${config.APP_ORIGIN}${config.BASE_PATH}/reset-password?code=${validCode.code}&exp=${expiresAt.getTime()}`
+        // const resetLink = `${config.FRONTEND_ORIGIN}${config.BASE_PATH}/reset-password?code=${validCode.code}&exp=${expiresAt.getTime()}`
+        const resetLink = `${config.FRONTEND_ORIGIN}/reset-password?code=${validCode.code}&exp=${expiresAt.getTime()}`
 
         const { data, error } = await sendEmail({
             to: user.email,
