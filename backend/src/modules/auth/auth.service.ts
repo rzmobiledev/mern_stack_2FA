@@ -52,7 +52,7 @@ export class AuthService {
         })
 
         // sending verification email link
-        const verificationUrl = `${config.APP_ORIGIN}/confirm-account?code=${verification.code}`;
+        const verificationUrl = `${config.FRONTEND_ORIGIN}/confirm-account?code=${verification.code}`;
         await sendEmail({
             to: newUser.email,
             ...verifyEmailTemplate(verificationUrl)
