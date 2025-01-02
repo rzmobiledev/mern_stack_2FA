@@ -1,6 +1,6 @@
 import React from "react";
-import EnableMfa from "../_components/EnableMfa";
-import Sessions from "../_components/Sessions";
+import EnableMfa from "./components/EnableMfa";
+import Sessions from "./components/Sessions";
 
 const Home = () => {
     return (
@@ -15,7 +15,6 @@ const Home = () => {
             </div>
             <div className="relative max-w-3xl py-0 mx-auto w-full px-6 md:max-w-5xl">
                 <div className="steps-gradient dark:bg-gray-800 absolute top-0 h-[700px] w-px"></div>
-
                 <div className="flex flex-col gap-5">
                     <div className="relative pl-6 transition duration-200 ease-in-out">
                         <div className="bg-white dark:bg-background  absolute -left-[9.5px] top-7 z-10 block h-5 w-5 rounded-full">

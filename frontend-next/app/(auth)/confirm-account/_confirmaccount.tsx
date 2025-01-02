@@ -81,7 +81,7 @@ export default function ConfirmAccount() {
             focus-visible:ring-2 text-primary hover:underline focus-visible:ring-primary"
                         href="#"
                     >
-                        support@squeezy.com
+                        rzmobiledev@gmail.com
                     </a>
                     .
                 </p>

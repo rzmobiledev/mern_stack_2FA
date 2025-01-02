@@ -1,10 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
-
 import {
     Form,
     FormControl,
@@ -16,29 +13,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
-import { ArrowLeft, Frown, Loader } from "lucide-react";
+import { ArrowLeft, Frown } from "lucide-react";
 import Link from "next/link";
-import { resetPasswordMutationFn } from "@/lib/api";
-import { toast } from "@/hooks/use-toast";
-
-type Payload = {
-    password: string
-    confirmPassword: string
-}
 
 export default function ResetPassword() {
-    const router = useRouter();
-
-    const params = useSearchParams();
-    const code = params.get("code");
-    const exp = Number(params.get("exp"));
-    const now = Date.now();
-
-    const isValid = code && exp && exp > now;
-
-    const { mutate, isPending } = useMutation({
-        mutationFn: resetPasswordMutationFn,
-    });
+    const isValid = false;
 
     const formSchema = z
         .object({
@@ -49,15 +28,10 @@ export default function ResetPassword() {
                 message: "Confirm password is required",
             }),
         })
-        .refine((data) => data.password.length > 6, {
-            message: "Password length mininumm 6 characters",
-            path: ["password"],
-        })
         .refine((data) => data.password === data.confirmPassword, {
             message: "Password does not match",
             path: ["confirmPassword"],
-        })
-
+        });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -67,32 +41,7 @@ export default function ResetPassword() {
         },
     });
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        if (!code) {
-            router.replace("/forgot-password?email=");
-            return;
-        }
-        const data = {
-            password: values.password,
-            verificationCode: code,
-        };
-        mutate(data, {
-            onSuccess: () => {
-                toast({
-                    title: "Success",
-                    description: "Password reset successfully",
-                });
-                router.replace("/");
-            },
-            onError: (error) => {
-                toast({
-                    title: "Error",
-                    description: error.message,
-                    variant: "destructive",
-                });
-            },
-        });
-    };
+    const onSubmit = (values: z.infer<typeof formSchema>) => {};
 
     return (
         <main className="w-full min-h-[590px] h-full max-w-full flex items-center justify-center ">
@@ -124,7 +73,7 @@ export default function ResetPassword() {
                                                 New password
                                             </FormLabel>
                                             <FormControl>
-                                                <Input type="password" placeholder="Enter your password" {...field} />
+                                                <Input placeholder="Enter your password" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -142,7 +91,6 @@ export default function ResetPassword() {
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="password"
                                                     placeholder="Enter your password again"
                                                     {...field}
                                                 />
@@ -153,11 +101,7 @@ export default function ResetPassword() {
                                 />
                             </div>
 
-                            <Button
-                                disabled={isPending}
-                                className="w-full text-[15px] h-[40px] text-white font-semibold"
-                            >
-                                {isPending && <Loader className="animate-spin" />}
+                            <Button className="w-full text-[15px] h-[40px] text-white font-semibold">
                                 Update password
                             </Button>
                         </form>

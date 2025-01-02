@@ -1,10 +1,11 @@
-import React from 'react';
+import { Suspense } from "react";
+import VerifyMfa from "./_verifymfa";
 
 const Page = () => {
     return (
-        <div>
-          Verify MFA
-        </div>
+        <Suspense>
+            <VerifyMfa />
+        </Suspense>
     );
 };
 
