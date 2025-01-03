@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "build/main.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["build/**"]
+      }
+    }
+  ],
+  "buildCommand": "npm run build",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/build/main.js"
+    }
+  ]
+}
